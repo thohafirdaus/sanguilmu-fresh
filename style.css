@@ -1775,6 +1775,57 @@ select {
 	box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.18);
 }
 
+.si-toc {
+	max-height: calc(100vh - 132px);
+}
+
+.si-toc-list {
+	counter-reset: si-toc;
+}
+
+.si-sidebar-widget .si-toc-list {
+	gap: 8px;
+}
+
+.si-sidebar-widget .si-toc-item a {
+	padding: 10px 12px 10px 42px;
+	font-size: 0.9rem;
+}
+
+.si-sidebar-widget .si-toc-item a::before {
+	content: counter(si-toc);
+	top: 10px;
+	left: 12px;
+	display: grid;
+	place-items: center;
+	width: 20px;
+	height: 20px;
+	background: rgba(84, 174, 195, 0.16);
+	box-shadow: none;
+	color: var(--si-primary);
+	font-size: 0.68rem;
+	font-weight: 850;
+}
+
+.si-toc-item {
+	counter-increment: si-toc;
+}
+
+.si-sidebar-widget .si-toc-level-3 a {
+	margin-left: 12px;
+	font-size: 0.86rem;
+}
+
+.si-sidebar-widget .si-toc-level-4 a {
+	margin-left: 24px;
+	font-size: 0.84rem;
+}
+
+.si-sidebar-widget .si-toc-item a:hover::before {
+	background: var(--si-accent);
+	color: #ffffff;
+}
+
 .si-sidebar-widget select,
 .si-sidebar-widget input[type="search"],
 .si-sidebar-widget input[type="text"] {

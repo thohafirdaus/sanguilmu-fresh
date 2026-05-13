@@ -71,6 +71,82 @@ function sanguilmu_fresh_widgets_init() {
 }
 add_action( 'widgets_init', 'sanguilmu_fresh_widgets_init' );
 
+function sanguilmu_fresh_add_heading_ids( $content ) {
+	if ( ! is_singular( 'post' ) || ! in_the_loop() ) {
+		return $content;
+	}
+
+	$GLOBALS['sanguilmu_fresh_toc_items'] = array();
+	$used_ids = array();
+
+	return preg_replace_callback( '/<h([2-4])([^>]*)>(.*?)<\/h\1>/is', function ( $matches ) use ( &$used_ids ) {
+		$level      = absint( $matches[1] );
+		$attributes = $matches[2];
+		$heading    = $matches[3];
+		$title      = trim( wp_strip_all_tags( $heading ) );
+
+		if ( '' === $title ) {
+			return $matches[0];
+		}
+
+		if ( preg_match( '/\sid=["\']([^"\']+)["\']/i', $attributes, $id_match ) ) {
+			$id = sanitize_title( $id_match[1] );
+		} else {
+			$id = sanitize_title( $title );
+			if ( '' === $id ) {
+				$id = 'bagian-artikel';
+			}
+
+			$attributes .= ' id="' . esc_attr( $id ) . '"';
+		}
+
+		$base_id = $id;
+		$counter = 2;
+
+		while ( in_array( $id, $used_ids, true ) ) {
+			$id = $base_id . '-' . $counter;
+			$counter++;
+		}
+
+		$used_ids[] = $id;
+
+		if ( $id !== $base_id ) {
+			if ( preg_match( '/\sid=["\'][^"\']+["\']/i', $attributes ) ) {
+				$attributes = preg_replace( '/\sid=["\'][^"\']+["\']/i', ' id="' . esc_attr( $id ) . '"', $attributes, 1 );
+			} else {
+				$attributes .= ' id="' . esc_attr( $id ) . '"';
+			}
+		}
+
+		$GLOBALS['sanguilmu_fresh_toc_items'][] = array(
+			'id'    => $id,
+			'level' => $level,
+			'title' => $title,
+		);
+
+		return '<h' . $level . $attributes . '>' . $heading . '</h' . $level . '>';
+	}, $content );
+}
+add_filter( 'the_content', 'sanguilmu_fresh_add_heading_ids', 9 );
+
+function sanguilmu_fresh_render_table_of_contents() {
+	if ( empty( $GLOBALS['sanguilmu_fresh_toc_items'] ) || ! is_singular( 'post' ) ) {
+		return;
+	}
+	?>
+	<section class="si-sidebar-widget si-toc" aria-label="<?php esc_attr_e( 'Daftar isi artikel', 'sanguilmu-fresh' ); ?>">
+		<h2><?php esc_html_e( 'Daftar Isi', 'sanguilmu-fresh' ); ?></h2>
+		<ol class="si-toc-list">
+			<?php foreach ( $GLOBALS['sanguilmu_fresh_toc_items'] as $item ) : ?>
+				<li class="si-toc-item si-toc-level-<?php echo esc_attr( $item['level'] ); ?>">
+					<a href="#<?php echo esc_attr( $item['id'] ); ?>"><?php echo esc_html( $item['title'] ); ?></a>
+				</li>
+			<?php endforeach; ?>
+		</ol>
+	</section>
+	<?php
+}
+
 function sanguilmu_fresh_register_mobile_app_post_type() {
 	register_post_type( 'si_mobile_app', array(
 		'labels' => array(

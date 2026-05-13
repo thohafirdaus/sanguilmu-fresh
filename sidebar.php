@@ -6,6 +6,8 @@
  */
 ?>
 <aside class="si-sidebar" aria-label="<?php esc_attr_e( 'Sidebar', 'sanguilmu-fresh' ); ?>">
+	<?php sanguilmu_fresh_render_table_of_contents(); ?>
+
 	<?php if ( is_active_sidebar( 'sidebar-1' ) ) : ?>
 		<?php dynamic_sidebar( 'sidebar-1' ); ?>
 	<?php else : ?>
