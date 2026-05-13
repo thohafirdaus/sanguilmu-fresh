@@ -57,6 +57,38 @@
 		});
 	}
 
+	const mobileToc = document.querySelector('.si-mobile-toc');
+	const mobileTocToggle = mobileToc ? mobileToc.querySelector('.si-mobile-toc-toggle') : null;
+	const mobileTocPanel = mobileToc ? mobileToc.querySelector('.si-mobile-toc-panel') : null;
+
+	function closeMobileToc() {
+		if (!mobileTocToggle || !mobileTocPanel) {
+			return;
+		}
+
+		mobileTocToggle.setAttribute('aria-expanded', 'false');
+		mobileTocPanel.hidden = true;
+	}
+
+	if (mobileTocToggle && mobileTocPanel) {
+		mobileTocToggle.addEventListener('click', function () {
+			const isOpen = mobileTocToggle.getAttribute('aria-expanded') === 'true';
+
+			mobileTocToggle.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+			mobileTocPanel.hidden = isOpen;
+		});
+
+		mobileTocPanel.querySelectorAll('a').forEach(function (link) {
+			link.addEventListener('click', closeMobileToc);
+		});
+
+		document.addEventListener('click', function (event) {
+			if (!mobileToc.contains(event.target)) {
+				closeMobileToc();
+			}
+		});
+	}
+
 	const revealItems = document.querySelectorAll('.si-reveal');
 
 	if ('IntersectionObserver' in window && revealItems.length) {

@@ -10,7 +10,9 @@ get_header();
 <?php
 while ( have_posts() ) :
 	the_post();
+	$post_content = apply_filters( 'the_content', get_the_content() );
 	?>
+	<?php sanguilmu_fresh_render_table_of_contents( 'mobile' ); ?>
 	<section class="si-page-hero">
 		<div class="si-container">
 			<?php sanguilmu_fresh_breadcrumbs(); ?>
@@ -39,7 +41,7 @@ while ( have_posts() ) :
 			<?php endif; ?>
 			<div class="si-entry-content">
 				<?php
-				the_content();
+				echo $post_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				wp_link_pages( array(
 					'before' => '<div class="si-pagination">',
 					'after'  => '</div>',

@@ -71,11 +71,7 @@ function sanguilmu_fresh_widgets_init() {
 }
 add_action( 'widgets_init', 'sanguilmu_fresh_widgets_init' );
 
-function sanguilmu_fresh_add_heading_ids( $content ) {
-	if ( ! is_singular( 'post' ) || ! in_the_loop() ) {
-		return $content;
-	}
-
+function sanguilmu_fresh_prepare_table_of_contents( $content ) {
 	$GLOBALS['sanguilmu_fresh_toc_items'] = array();
 	$used_ids = array();
 
@@ -127,15 +123,33 @@ function sanguilmu_fresh_add_heading_ids( $content ) {
 		return '<h' . $level . $attributes . '>' . $heading . '</h' . $level . '>';
 	}, $content );
 }
+
+function sanguilmu_fresh_add_heading_ids( $content ) {
+	if ( ! is_singular( 'post' ) || ! in_the_loop() ) {
+		return $content;
+	}
+
+	return sanguilmu_fresh_prepare_table_of_contents( $content );
+}
 add_filter( 'the_content', 'sanguilmu_fresh_add_heading_ids', 9 );
 
-function sanguilmu_fresh_render_table_of_contents() {
+function sanguilmu_fresh_render_table_of_contents( $variant = 'sidebar' ) {
 	if ( empty( $GLOBALS['sanguilmu_fresh_toc_items'] ) || ! is_singular( 'post' ) ) {
 		return;
 	}
+
+	$is_mobile = 'mobile' === $variant;
 	?>
-	<section class="si-sidebar-widget si-toc" aria-label="<?php esc_attr_e( 'Daftar isi artikel', 'sanguilmu-fresh' ); ?>">
-		<h2><?php esc_html_e( 'Daftar Isi', 'sanguilmu-fresh' ); ?></h2>
+	<section class="<?php echo esc_attr( $is_mobile ? 'si-mobile-toc' : 'si-sidebar-widget si-toc si-toc-sidebar' ); ?>" aria-label="<?php esc_attr_e( 'Daftar isi artikel', 'sanguilmu-fresh' ); ?>">
+		<?php if ( $is_mobile ) : ?>
+			<button class="si-mobile-toc-toggle" type="button" aria-expanded="false">
+				<span><?php esc_html_e( 'Daftar Isi', 'sanguilmu-fresh' ); ?></span>
+				<strong><?php echo esc_html( count( $GLOBALS['sanguilmu_fresh_toc_items'] ) ); ?></strong>
+			</button>
+			<div class="si-mobile-toc-panel" hidden>
+		<?php else : ?>
+			<h2><?php esc_html_e( 'Daftar Isi', 'sanguilmu-fresh' ); ?></h2>
+		<?php endif; ?>
 		<ol class="si-toc-list">
 			<?php foreach ( $GLOBALS['sanguilmu_fresh_toc_items'] as $item ) : ?>
 				<li class="si-toc-item si-toc-level-<?php echo esc_attr( $item['level'] ); ?>">
@@ -143,6 +157,9 @@ function sanguilmu_fresh_render_table_of_contents() {
 				</li>
 			<?php endforeach; ?>
 		</ol>
+		<?php if ( $is_mobile ) : ?>
+			</div>
+		<?php endif; ?>
 	</section>
 	<?php
 }
