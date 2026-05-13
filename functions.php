@@ -34,6 +34,9 @@ function sanguilmu_fresh_setup() {
 add_action( 'after_setup_theme', 'sanguilmu_fresh_setup' );
 
 function sanguilmu_fresh_assets() {
+	$style_path = get_stylesheet_directory() . '/style.css';
+	$script_path = get_template_directory() . '/assets/js/main.js';
+
 	wp_enqueue_style(
 		'sanguilmu-fresh-fonts',
 		'https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap',
@@ -45,14 +48,14 @@ function sanguilmu_fresh_assets() {
 		'sanguilmu-fresh-style',
 		get_stylesheet_uri(),
 		array( 'sanguilmu-fresh-fonts' ),
-		wp_get_theme()->get( 'Version' )
+		file_exists( $style_path ) ? filemtime( $style_path ) : wp_get_theme()->get( 'Version' )
 	);
 
 	wp_enqueue_script(
 		'sanguilmu-fresh-main',
 		get_template_directory_uri() . '/assets/js/main.js',
 		array(),
-		wp_get_theme()->get( 'Version' ),
+		file_exists( $script_path ) ? filemtime( $script_path ) : wp_get_theme()->get( 'Version' ),
 		true
 	);
 }
@@ -140,13 +143,17 @@ function sanguilmu_fresh_render_table_of_contents( $variant = 'sidebar' ) {
 
 	$is_mobile = 'mobile' === $variant;
 	?>
-	<section class="<?php echo esc_attr( $is_mobile ? 'si-mobile-toc' : 'si-sidebar-widget si-toc si-toc-sidebar' ); ?>" aria-label="<?php esc_attr_e( 'Daftar isi artikel', 'sanguilmu-fresh' ); ?>">
+	<?php if ( $is_mobile ) : ?>
+	<details class="si-mobile-toc" aria-label="<?php esc_attr_e( 'Daftar isi artikel', 'sanguilmu-fresh' ); ?>">
+	<?php else : ?>
+	<section class="si-sidebar-widget si-toc si-toc-sidebar" aria-label="<?php esc_attr_e( 'Daftar isi artikel', 'sanguilmu-fresh' ); ?>">
+	<?php endif; ?>
 		<?php if ( $is_mobile ) : ?>
-			<button class="si-mobile-toc-toggle" type="button" aria-expanded="false">
-				<span><?php esc_html_e( 'Daftar Isi', 'sanguilmu-fresh' ); ?></span>
+			<summary class="si-mobile-toc-toggle">
+				<span class="si-mobile-toc-current" data-default-label="<?php esc_attr_e( 'Daftar Isi', 'sanguilmu-fresh' ); ?>"><?php esc_html_e( 'Daftar Isi', 'sanguilmu-fresh' ); ?></span>
 				<strong><?php echo esc_html( count( $GLOBALS['sanguilmu_fresh_toc_items'] ) ); ?></strong>
-			</button>
-			<div class="si-mobile-toc-panel" hidden>
+			</summary>
+			<div class="si-mobile-toc-panel">
 		<?php else : ?>
 			<h2><?php esc_html_e( 'Daftar Isi', 'sanguilmu-fresh' ); ?></h2>
 		<?php endif; ?>
@@ -160,7 +167,11 @@ function sanguilmu_fresh_render_table_of_contents( $variant = 'sidebar' ) {
 		<?php if ( $is_mobile ) : ?>
 			</div>
 		<?php endif; ?>
+	<?php if ( $is_mobile ) : ?>
+	</details>
+	<?php else : ?>
 	</section>
+	<?php endif; ?>
 	<?php
 }
 
